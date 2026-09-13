@@ -1,0 +1,1616 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>FlashDrop PIN — نقل ملفات Offline مباشر</title>
+<style>
+:root{
+  --bg:#09101f;--card:#101a31;--card2:#0b1428;--line:#263759;--txt:#f4f7ff;
+  --muted:#96a7c8;--accent:#7b68ff;--accent2:#9a8cff;--ok:#2cd39a;--warn:#ffbf5b;--bad:#ff7182;
+}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 20% 0,#172345 0,#0a1020 38%,#070c17 100%);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif}
+body{padding:14px}.app{max-width:980px;margin:auto}.hero{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin:6px 0 16px}
+h1{margin:0;font-size:clamp(27px,6vw,44px);letter-spacing:-1px}.hero p{margin:7px 0 0;color:var(--muted);line-height:1.7}
+.badge{border:1px solid var(--line);background:#0b1428;border-radius:999px;padding:8px 11px;font-size:12px;color:#c8d3ed;white-space:nowrap}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(16,26,49,.98),rgba(9,18,35,.98));border-radius:18px;padding:15px;box-shadow:0 16px 44px rgba(0,0,0,.22)}
+.card h2{font-size:18px;margin:0 0 11px}.rolebar{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+button{border:1px solid var(--line);background:#182647;color:#fff;border-radius:13px;padding:12px 13px;font:700 14px inherit;cursor:pointer;transition:.18s}
+button:hover{transform:translateY(-1px);border-color:#52668d}button:disabled{opacity:.42;cursor:not-allowed;transform:none}
+button.primary{background:linear-gradient(135deg,#6b58ff,#8879ff);border-color:transparent}button.good{background:linear-gradient(135deg,#16996e,#2dd29a);border-color:transparent;color:#04130d}
+button.danger{background:#321824;border-color:#6b3041;color:#ffc2cb}.role.active{outline:2px solid var(--accent);background:#282257}
+.status{display:flex;align-items:center;gap:9px;margin:11px 0 0;padding:10px 12px;background:#091326;border:1px solid var(--line);border-radius:13px}
+.dot{width:10px;height:10px;border-radius:50%;background:#657491;box-shadow:0 0 0 4px rgba(101,116,145,.13)}.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}
+.status small{margin-inline-start:auto;color:var(--muted)}.panel{margin-top:12px;border:1px solid var(--line);border-radius:15px;padding:13px;background:#0a1427}
+.stepTitle{font-weight:800;margin-bottom:9px}.hint{font-size:12px;color:var(--muted);line-height:1.65;margin-top:8px}.hide{display:none!important}
+.pinbox{text-align:center;background:#08101f;border:1px solid #32446f;border-radius:16px;padding:14px;margin:10px 0}.pinbox span{display:block;color:var(--muted);font-size:12px}.pinbox strong{display:block;font-size:38px;letter-spacing:9px;margin-top:3px;direction:ltr}
+.qrbox{background:#fff;border-radius:18px;padding:12px;width:min(100%,340px);aspect-ratio:1;margin:10px auto;display:grid;place-items:center;overflow:hidden}
+.qrbox canvas{width:100%;height:100%;image-rendering:pixelated}.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.compat{margin-top:10px}.compat summary{cursor:pointer;color:#b9c5df;font-size:12px}.compat textarea{width:100%;min-height:86px;margin-top:8px;background:#070d19;color:#ced9f5;border:1px solid #2a3b61;border-radius:10px;padding:9px;font:11px ui-monospace,Consolas,monospace;direction:ltr;text-align:left}
+.camera{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:100;display:flex;align-items:center;justify-content:center;padding:15px}.camCard{width:min(100%,560px);background:#0e1730;border:1px solid #31436e;border-radius:18px;padding:12px}.camCard video{width:100%;max-height:64vh;background:#000;border-radius:14px;object-fit:cover}.camTop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.drop{border:1.5px dashed #41547e;border-radius:15px;padding:18px;text-align:center;background:#091326;cursor:pointer}.drop.drag{border-color:var(--accent);background:#15173c}.drop strong{display:block}.drop span{display:block;color:var(--muted);font-size:12px;margin-top:5px}input[type=file]{display:none}
+.files,.received{display:grid;gap:8px;margin-top:10px}.file,.recv{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:12px;background:#091326;padding:10px 11px}.meta{min-width:0;flex:1}.meta b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta small{color:var(--muted)}
+.recv a{background:#1b7559;color:#fff;text-decoration:none;padding:8px 10px;border-radius:9px;font-size:12px;font-weight:800}.progress{height:10px;background:#050a13;border:1px solid #223251;border-radius:999px;overflow:hidden;margin-top:12px}.bar{height:100%;width:0;background:linear-gradient(90deg,#725fff,#2bd29a);transition:width .1s linear}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px}.stat{background:#091326;border:1px solid var(--line);border-radius:11px;text-align:center;padding:9px}.stat b{display:block}.stat span{font-size:11px;color:var(--muted)}
+.notice{margin-top:13px;padding:12px 13px;background:#11152c;border:1px solid #363b62;border-radius:14px;color:#c7d2eb;font-size:13px;line-height:1.7}.notice b{color:#fff}.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,18px);opacity:0;pointer-events:none;background:#111b32;border:1px solid #354970;padding:10px 14px;border-radius:12px;z-index:120;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
+.footer{text-align:center;color:#7585a8;font-size:12px;padding:17px 0 4px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.badge{display:none}.stats{grid-template-columns:1fr 1fr}.card{padding:13px}body{padding:10px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hero">
+    <div>
+      <h1>⚡ FlashDrop PIN</h1>
+      <p>نقل مباشر وسريع بين جهازين، بدون Cloud وبدون إنترنت. بيانات الاتصال الطويلة مخفية بالكامل.</p>
+    </div>
+    <div class="badge">Offline LAN • WebRTC • QR Pairing</div>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2>1) الربط بين الجهازين</h2>
+      <div class="rolebar">
+        <button id="senderRole" class="role">📤 إرسال</button>
+        <button id="receiverRole" class="role">📥 استلام</button>
+      </div>
+      <div class="status">
+        <span id="dot" class="dot"></span>
+        <b id="status">غير متصل</b>
+        <small id="ice">Offline</small>
+      </div>
+
+      <div id="senderPanel" class="hide">
+        <div class="panel">
+          <div class="stepTitle">الجهاز المرسل</div>
+          <button id="startSender" class="primary">إنشاء رمز الربط</button>
+
+          <div id="senderOfferBox" class="hide">
+            <div class="pinbox"><span>PIN للتأكد أن الجهازين نفس الجلسة</span><strong id="senderPin">----</strong></div>
+            <div id="offerQR" class="qrbox"></div>
+            <div class="hint">على الجهاز المستقبل اضغط «مسح QR المرسل» ووجّه الكاميرا لهذا المربع.</div>
+          </div>
+
+          <div id="scanAnswerBox" class="hide">
+            <div class="row">
+              <button id="scanAnswer" class="good">📷 مسح QR الرد</button>
+              <label for="answerImage" style="display:inline-flex"><span class="btnLike"></span></label>
+              <button id="answerImageBtn">🖼 قراءة QR من صورة</button>
+              <input id="answerImage" type="file" accept="image/*">
+            </div>
+            <div class="hint">بعد مسح رد الجهاز المستقبل يتم الاتصال مباشرة.</div>
+          </div>
+
+          <details class="compat">
+            <summary>خيارات توافق إذا الكاميرا/QR غير مدعوم</summary>
+            <textarea id="offerPacket" readonly placeholder="بيانات Offer المخفية"></textarea>
+            <div class="row"><button id="copyOfferPacket">نسخ بيانات الربط</button></div>
+            <textarea id="answerPacketIn" placeholder="الصق بيانات الرد هنا"></textarea>
+            <div class="row"><button id="applyAnswerPacket">تطبيق الرد</button></div>
+          </details>
+        </div>
+      </div>
+
+      <div id="receiverPanel" class="hide">
+        <div class="panel">
+          <div class="stepTitle">الجهاز المستقبل</div>
+          <div class="row">
+            <button id="scanOffer" class="primary">📷 مسح QR المرسل</button>
+            <button id="offerImageBtn">🖼 قراءة QR من صورة</button>
+            <input id="offerImage" type="file" accept="image/*">
+          </div>
+
+          <div id="receiverAnswerBox" class="hide">
+            <div class="pinbox"><span>PIN الجلسة</span><strong id="receiverPin">----</strong></div>
+            <div id="answerQR" class="qrbox"></div>
+            <div class="hint">خلِّ الجهاز المرسل يمسح هذا الـQR. إذا PIN نفسه على الجهازين فالجلسة صحيحة.</div>
+          </div>
+
+          <details class="compat">
+            <summary>خيارات توافق إذا الكاميرا/QR غير مدعوم</summary>
+            <textarea id="offerPacketIn" placeholder="الصق بيانات Offer هنا"></textarea>
+            <div class="row"><button id="applyOfferPacket">إنشاء الرد</button></div>
+            <textarea id="answerPacket" readonly placeholder="بيانات Answer المخفية"></textarea>
+            <div class="row"><button id="copyAnswerPacket">نسخ بيانات الرد</button></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2) الملفات</h2>
+      <div id="sendPane" class="hide">
+        <label id="drop" class="drop" for="filePicker">
+          <strong>اختَر ملفات أو اسحبها هنا</strong>
+          <span>يمكن إرسال عدة ملفات دفعة واحدة.</span>
+        </label>
+        <input id="filePicker" type="file" multiple>
+        <div id="fileList" class="files"></div>
+        <div class="row">
+          <button id="sendBtn" class="good" disabled>⚡ إرسال</button>
+          <button id="clearBtn" disabled>مسح</button>
+          <button id="cancelBtn" class="danger" disabled>إيقاف</button>
+        </div>
+      </div>
+
+      <div id="recvPane" class="hide">
+        <div class="notice"><b>جاهز للاستلام.</b> كل ملف مكتمل سيظهر هنا مع زر حفظ.</div>
+        <div id="received" class="received"></div>
+      </div>
+
+      <div class="progress"><div id="bar" class="bar"></div></div>
+      <div class="stats">
+        <div class="stat"><b id="pct">0%</b><span>التقدم</span></div>
+        <div class="stat"><b id="speed">0 MB/s</b><span>السرعة</span></div>
+        <div class="stat"><b id="done">0 B</b><span>تم</span></div>
+        <div class="stat"><b id="total">0 B</b><span>المجموع</span></div>
+      </div>
+      <div id="active" class="hint">لا يوجد نقل حالي.</div>
+    </section>
+  </div>
+
+  <div class="notice">
+    <b>بدون إنترنت:</b> أطفئ Mobile Data عادي. افتح Hotspot من أحد الجهازين واربط الجهاز الثاني عليه، أو استخدم نفس Wi‑Fi المحلي.
+    هذه الشبكة فقط هي الطريق اللاسلكي بين الجهازين؛ الملفات لا تذهب للإنترنت ولا لأي سيرفر.
+  </div>
+  <div class="notice">
+    <b>ليش مو PIN وحده؟</b> الـPIN القصير لا يحتوي عنوان الجهاز ومفاتيح WebRTC، لذلك الـQR يحمل معلومات الربط المخفية محلياً.
+    إذا تريد فعلاً «أكتب 4 أرقام فقط ولا QR ولا شبكة»، فهذا يحتاج تطبيق Native/خدمة pairing منفصلة، وليس ملف HTML مستقل.
+  </div>
+  <div class="footer">FlashDrop PIN • WebRTC DataChannel • no STUN • no cloud upload</div>
+</div>
+
+<div id="cameraOverlay" class="camera hide">
+  <div class="camCard">
+    <div class="camTop"><b>وجّه الكاميرا إلى QR</b><button id="closeCam" class="danger">إغلاق</button></div>
+    <video id="video" autoplay playsinline muted></video>
+    <div class="hint">سيتم الالتقاط تلقائياً عند قراءة الرمز.</div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+/* QR generator is embedded below; no internet library is loaded. */
+
+(function(g){
+  const modules = {"./QRMode": function(require,module,exports){
+module.exports = {
+    MODE_NUMBER :       1 << 0,
+    MODE_ALPHA_NUM :    1 << 1,
+    MODE_8BIT_BYTE :    1 << 2,
+    MODE_KANJI :        1 << 3
+};
+
+},"./QRErrorCorrectLevel": function(require,module,exports){
+module.exports = {
+	L : 1,
+	M : 0,
+	Q : 3,
+	H : 2
+};
+
+
+},"./QRMaskPattern": function(require,module,exports){
+module.exports = {
+	PATTERN000 : 0,
+	PATTERN001 : 1,
+	PATTERN010 : 2,
+	PATTERN011 : 3,
+	PATTERN100 : 4,
+	PATTERN101 : 5,
+	PATTERN110 : 6,
+	PATTERN111 : 7
+};
+
+},"./QRMath": function(require,module,exports){
+var QRMath = {
+
+	glog : function(n) {
+	
+		if (n < 1) {
+			throw new Error("glog(" + n + ")");
+		}
+		
+		return QRMath.LOG_TABLE[n];
+	},
+	
+	gexp : function(n) {
+	
+		while (n < 0) {
+			n += 255;
+		}
+	
+		while (n >= 256) {
+			n -= 255;
+		}
+	
+		return QRMath.EXP_TABLE[n];
+	},
+	
+	EXP_TABLE : new Array(256),
+	
+	LOG_TABLE : new Array(256)
+
+};
+	
+for (var i = 0; i < 8; i++) {
+	QRMath.EXP_TABLE[i] = 1 << i;
+}
+for (var i = 8; i < 256; i++) {
+	QRMath.EXP_TABLE[i] = QRMath.EXP_TABLE[i - 4]
+		^ QRMath.EXP_TABLE[i - 5]
+		^ QRMath.EXP_TABLE[i - 6]
+		^ QRMath.EXP_TABLE[i - 8];
+}
+for (var i = 0; i < 255; i++) {
+	QRMath.LOG_TABLE[QRMath.EXP_TABLE[i] ] = i;
+}
+
+module.exports = QRMath;
+
+},"./QRPolynomial": function(require,module,exports){
+var QRMath = require('./QRMath');
+
+function QRPolynomial(num, shift) {
+	if (num.length === undefined) {
+		throw new Error(num.length + "/" + shift);
+	}
+
+	var offset = 0;
+
+	while (offset < num.length && num[offset] === 0) {
+		offset++;
+	}
+
+	this.num = new Array(num.length - offset + shift);
+	for (var i = 0; i < num.length - offset; i++) {
+		this.num[i] = num[i + offset];
+	}
+}
+
+QRPolynomial.prototype = {
+
+	get : function(index) {
+		return this.num[index];
+	},
+	
+	getLength : function() {
+		return this.num.length;
+	},
+	
+	multiply : function(e) {
+	
+		var num = new Array(this.getLength() + e.getLength() - 1);
+	
+		for (var i = 0; i < this.getLength(); i++) {
+			for (var j = 0; j < e.getLength(); j++) {
+				num[i + j] ^= QRMath.gexp(QRMath.glog(this.get(i) ) + QRMath.glog(e.get(j) ) );
+			}
+		}
+	
+		return new QRPolynomial(num, 0);
+	},
+	
+	mod : function(e) {
+	
+		if (this.getLength() - e.getLength() < 0) {
+			return this;
+		}
+	
+		var ratio = QRMath.glog(this.get(0) ) - QRMath.glog(e.get(0) );
+	
+		var num = new Array(this.getLength() );
+		
+		for (var i = 0; i < this.getLength(); i++) {
+			num[i] = this.get(i);
+		}
+		
+		for (var x = 0; x < e.getLength(); x++) {
+			num[x] ^= QRMath.gexp(QRMath.glog(e.get(x) ) + ratio);
+		}
+	
+		// recursive call
+		return new QRPolynomial(num, 0).mod(e);
+	}
+};
+
+module.exports = QRPolynomial;
+
+},"./QRBitBuffer": function(require,module,exports){
+function QRBitBuffer() {
+	this.buffer = [];
+	this.length = 0;
+}
+
+QRBitBuffer.prototype = {
+
+	get : function(index) {
+		var bufIndex = Math.floor(index / 8);
+		return ( (this.buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+	},
+	
+	put : function(num, length) {
+		for (var i = 0; i < length; i++) {
+			this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+		}
+	},
+	
+	getLengthInBits : function() {
+		return this.length;
+	},
+	
+	putBit : function(bit) {
+	
+		var bufIndex = Math.floor(this.length / 8);
+		if (this.buffer.length <= bufIndex) {
+			this.buffer.push(0);
+		}
+	
+		if (bit) {
+			this.buffer[bufIndex] |= (0x80 >>> (this.length % 8) );
+		}
+	
+		this.length++;
+	}
+};
+
+module.exports = QRBitBuffer;
+
+},"./QR8bitByte": function(require,module,exports){
+var QRMode = require('./QRMode');
+
+function QR8bitByte(data) {
+	this.mode = QRMode.MODE_8BIT_BYTE;
+	this.data = data;
+}
+
+QR8bitByte.prototype = {
+
+	getLength : function() {
+		return this.data.length;
+	},
+	
+	write : function(buffer) {
+		for (var i = 0; i < this.data.length; i++) {
+			// not JIS ...
+			buffer.put(this.data.charCodeAt(i), 8);
+		}
+	}
+};
+
+module.exports = QR8bitByte;
+
+},"./QRRSBlock": function(require,module,exports){
+var QRErrorCorrectLevel = require('./QRErrorCorrectLevel');
+
+function QRRSBlock(totalCount, dataCount) {
+	this.totalCount = totalCount;
+	this.dataCount  = dataCount;
+}
+
+QRRSBlock.RS_BLOCK_TABLE = [
+
+	// L
+	// M
+	// Q
+	// H
+
+	// 1
+	[1, 26, 19],
+	[1, 26, 16],
+	[1, 26, 13],
+	[1, 26, 9],
+	
+	// 2
+	[1, 44, 34],
+	[1, 44, 28],
+	[1, 44, 22],
+	[1, 44, 16],
+
+	// 3
+	[1, 70, 55],
+	[1, 70, 44],
+	[2, 35, 17],
+	[2, 35, 13],
+
+	// 4		
+	[1, 100, 80],
+	[2, 50, 32],
+	[2, 50, 24],
+	[4, 25, 9],
+	
+	// 5
+	[1, 134, 108],
+	[2, 67, 43],
+	[2, 33, 15, 2, 34, 16],
+	[2, 33, 11, 2, 34, 12],
+	
+	// 6
+	[2, 86, 68],
+	[4, 43, 27],
+	[4, 43, 19],
+	[4, 43, 15],
+	
+	// 7		
+	[2, 98, 78],
+	[4, 49, 31],
+	[2, 32, 14, 4, 33, 15],
+	[4, 39, 13, 1, 40, 14],
+	
+	// 8
+	[2, 121, 97],
+	[2, 60, 38, 2, 61, 39],
+	[4, 40, 18, 2, 41, 19],
+	[4, 40, 14, 2, 41, 15],
+	
+	// 9
+	[2, 146, 116],
+	[3, 58, 36, 2, 59, 37],
+	[4, 36, 16, 4, 37, 17],
+	[4, 36, 12, 4, 37, 13],
+	
+	// 10		
+	[2, 86, 68, 2, 87, 69],
+	[4, 69, 43, 1, 70, 44],
+	[6, 43, 19, 2, 44, 20],
+	[6, 43, 15, 2, 44, 16],
+
+	// 11
+	[4, 101, 81],
+	[1, 80, 50, 4, 81, 51],
+	[4, 50, 22, 4, 51, 23],
+	[3, 36, 12, 8, 37, 13],
+
+	// 12
+	[2, 116, 92, 2, 117, 93],
+	[6, 58, 36, 2, 59, 37],
+	[4, 46, 20, 6, 47, 21],
+	[7, 42, 14, 4, 43, 15],
+
+	// 13
+	[4, 133, 107],
+	[8, 59, 37, 1, 60, 38],
+	[8, 44, 20, 4, 45, 21],
+	[12, 33, 11, 4, 34, 12],
+
+	// 14
+	[3, 145, 115, 1, 146, 116],
+	[4, 64, 40, 5, 65, 41],
+	[11, 36, 16, 5, 37, 17],
+	[11, 36, 12, 5, 37, 13],
+
+	// 15
+	[5, 109, 87, 1, 110, 88],
+	[5, 65, 41, 5, 66, 42],
+	[5, 54, 24, 7, 55, 25],
+	[11, 36, 12],
+
+	// 16
+	[5, 122, 98, 1, 123, 99],
+	[7, 73, 45, 3, 74, 46],
+	[15, 43, 19, 2, 44, 20],
+	[3, 45, 15, 13, 46, 16],
+
+	// 17
+	[1, 135, 107, 5, 136, 108],
+	[10, 74, 46, 1, 75, 47],
+	[1, 50, 22, 15, 51, 23],
+	[2, 42, 14, 17, 43, 15],
+
+	// 18
+	[5, 150, 120, 1, 151, 121],
+	[9, 69, 43, 4, 70, 44],
+	[17, 50, 22, 1, 51, 23],
+	[2, 42, 14, 19, 43, 15],
+
+	// 19
+	[3, 141, 113, 4, 142, 114],
+	[3, 70, 44, 11, 71, 45],
+	[17, 47, 21, 4, 48, 22],
+	[9, 39, 13, 16, 40, 14],
+
+	// 20
+	[3, 135, 107, 5, 136, 108],
+	[3, 67, 41, 13, 68, 42],
+	[15, 54, 24, 5, 55, 25],
+	[15, 43, 15, 10, 44, 16],
+
+	// 21
+	[4, 144, 116, 4, 145, 117],
+	[17, 68, 42],
+	[17, 50, 22, 6, 51, 23],
+	[19, 46, 16, 6, 47, 17],
+
+	// 22
+	[2, 139, 111, 7, 140, 112],
+	[17, 74, 46],
+	[7, 54, 24, 16, 55, 25],
+	[34, 37, 13],
+
+	// 23
+	[4, 151, 121, 5, 152, 122],
+	[4, 75, 47, 14, 76, 48],
+	[11, 54, 24, 14, 55, 25],
+	[16, 45, 15, 14, 46, 16],
+
+	// 24
+	[6, 147, 117, 4, 148, 118],
+	[6, 73, 45, 14, 74, 46],
+	[11, 54, 24, 16, 55, 25],
+	[30, 46, 16, 2, 47, 17],
+
+	// 25
+	[8, 132, 106, 4, 133, 107],
+	[8, 75, 47, 13, 76, 48],
+	[7, 54, 24, 22, 55, 25],
+	[22, 45, 15, 13, 46, 16],
+
+	// 26
+	[10, 142, 114, 2, 143, 115],
+	[19, 74, 46, 4, 75, 47],
+	[28, 50, 22, 6, 51, 23],
+	[33, 46, 16, 4, 47, 17],
+
+	// 27
+	[8, 152, 122, 4, 153, 123],
+	[22, 73, 45, 3, 74, 46],
+	[8, 53, 23, 26, 54, 24],
+	[12, 45, 15, 28, 46, 16],
+
+	// 28
+	[3, 147, 117, 10, 148, 118],
+	[3, 73, 45, 23, 74, 46],
+	[4, 54, 24, 31, 55, 25],
+	[11, 45, 15, 31, 46, 16],
+
+	// 29
+	[7, 146, 116, 7, 147, 117],
+	[21, 73, 45, 7, 74, 46],
+	[1, 53, 23, 37, 54, 24],
+	[19, 45, 15, 26, 46, 16],
+
+	// 30
+	[5, 145, 115, 10, 146, 116],
+	[19, 75, 47, 10, 76, 48],
+	[15, 54, 24, 25, 55, 25],
+	[23, 45, 15, 25, 46, 16],
+
+	// 31
+	[13, 145, 115, 3, 146, 116],
+	[2, 74, 46, 29, 75, 47],
+	[42, 54, 24, 1, 55, 25],
+	[23, 45, 15, 28, 46, 16],
+
+	// 32
+	[17, 145, 115],
+	[10, 74, 46, 23, 75, 47],
+	[10, 54, 24, 35, 55, 25],
+	[19, 45, 15, 35, 46, 16],
+
+	// 33
+	[17, 145, 115, 1, 146, 116],
+	[14, 74, 46, 21, 75, 47],
+	[29, 54, 24, 19, 55, 25],
+	[11, 45, 15, 46, 46, 16],
+
+	// 34
+	[13, 145, 115, 6, 146, 116],
+	[14, 74, 46, 23, 75, 47],
+	[44, 54, 24, 7, 55, 25],
+	[59, 46, 16, 1, 47, 17],
+
+	// 35
+	[12, 151, 121, 7, 152, 122],
+	[12, 75, 47, 26, 76, 48],
+	[39, 54, 24, 14, 55, 25],
+	[22, 45, 15, 41, 46, 16],
+
+	// 36
+	[6, 151, 121, 14, 152, 122],
+	[6, 75, 47, 34, 76, 48],
+	[46, 54, 24, 10, 55, 25],
+	[2, 45, 15, 64, 46, 16],
+
+	// 37
+	[17, 152, 122, 4, 153, 123],
+	[29, 74, 46, 14, 75, 47],
+	[49, 54, 24, 10, 55, 25],
+	[24, 45, 15, 46, 46, 16],
+
+	// 38
+	[4, 152, 122, 18, 153, 123],
+	[13, 74, 46, 32, 75, 47],
+	[48, 54, 24, 14, 55, 25],
+	[42, 45, 15, 32, 46, 16],
+
+	// 39
+	[20, 147, 117, 4, 148, 118],
+	[40, 75, 47, 7, 76, 48],
+	[43, 54, 24, 22, 55, 25],
+	[10, 45, 15, 67, 46, 16],
+
+	// 40
+	[19, 148, 118, 6, 149, 119],
+	[18, 75, 47, 31, 76, 48],
+	[34, 54, 24, 34, 55, 25],
+	[20, 45, 15, 61, 46, 16]
+];
+
+QRRSBlock.getRSBlocks = function(typeNumber, errorCorrectLevel) {
+	
+	var rsBlock = QRRSBlock.getRsBlockTable(typeNumber, errorCorrectLevel);
+	
+	if (rsBlock === undefined) {
+		throw new Error("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + errorCorrectLevel);
+	}
+
+	var length = rsBlock.length / 3;
+	
+	var list = [];
+	
+	for (var i = 0; i < length; i++) {
+
+		var count = rsBlock[i * 3 + 0];
+		var totalCount = rsBlock[i * 3 + 1];
+		var dataCount  = rsBlock[i * 3 + 2];
+
+		for (var j = 0; j < count; j++) {
+			list.push(new QRRSBlock(totalCount, dataCount) );	
+		}
+	}
+	
+	return list;
+};
+
+QRRSBlock.getRsBlockTable = function(typeNumber, errorCorrectLevel) {
+
+	switch(errorCorrectLevel) {
+	case QRErrorCorrectLevel.L :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+	case QRErrorCorrectLevel.M :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+	case QRErrorCorrectLevel.Q :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+	case QRErrorCorrectLevel.H :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+	default :
+		return undefined;
+	}
+};
+
+module.exports = QRRSBlock;
+
+},"./QRUtil": function(require,module,exports){
+var QRMode = require('./QRMode');
+var QRPolynomial = require('./QRPolynomial');
+var QRMath = require('./QRMath');
+var QRMaskPattern = require('./QRMaskPattern');
+
+var QRUtil = {
+
+    PATTERN_POSITION_TABLE : [
+        [],
+        [6, 18],
+        [6, 22],
+        [6, 26],
+        [6, 30],
+        [6, 34],
+        [6, 22, 38],
+        [6, 24, 42],
+        [6, 26, 46],
+        [6, 28, 50],
+        [6, 30, 54],        
+        [6, 32, 58],
+        [6, 34, 62],
+        [6, 26, 46, 66],
+        [6, 26, 48, 70],
+        [6, 26, 50, 74],
+        [6, 30, 54, 78],
+        [6, 30, 56, 82],
+        [6, 30, 58, 86],
+        [6, 34, 62, 90],
+        [6, 28, 50, 72, 94],
+        [6, 26, 50, 74, 98],
+        [6, 30, 54, 78, 102],
+        [6, 28, 54, 80, 106],
+        [6, 32, 58, 84, 110],
+        [6, 30, 58, 86, 114],
+        [6, 34, 62, 90, 118],
+        [6, 26, 50, 74, 98, 122],
+        [6, 30, 54, 78, 102, 126],
+        [6, 26, 52, 78, 104, 130],
+        [6, 30, 56, 82, 108, 134],
+        [6, 34, 60, 86, 112, 138],
+        [6, 30, 58, 86, 114, 142],
+        [6, 34, 62, 90, 118, 146],
+        [6, 30, 54, 78, 102, 126, 150],
+        [6, 24, 50, 76, 102, 128, 154],
+        [6, 28, 54, 80, 106, 132, 158],
+        [6, 32, 58, 84, 110, 136, 162],
+        [6, 26, 54, 82, 110, 138, 166],
+        [6, 30, 58, 86, 114, 142, 170]
+    ],
+
+    G15 : (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0),
+    G18 : (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0),
+    G15_MASK : (1 << 14) | (1 << 12) | (1 << 10)    | (1 << 4) | (1 << 1),
+
+    getBCHTypeInfo : function(data) {
+        var d = data << 10;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) >= 0) {
+            d ^= (QRUtil.G15 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) ) );    
+        }
+        return ( (data << 10) | d) ^ QRUtil.G15_MASK;
+    },
+
+    getBCHTypeNumber : function(data) {
+        var d = data << 12;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) >= 0) {
+            d ^= (QRUtil.G18 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) ) );    
+        }
+        return (data << 12) | d;
+    },
+
+    getBCHDigit : function(data) {
+
+        var digit = 0;
+
+        while (data !== 0) {
+            digit++;
+            data >>>= 1;
+        }
+
+        return digit;
+    },
+
+    getPatternPosition : function(typeNumber) {
+        return QRUtil.PATTERN_POSITION_TABLE[typeNumber - 1];
+    },
+
+    getMask : function(maskPattern, i, j) {
+        
+        switch (maskPattern) {
+            
+        case QRMaskPattern.PATTERN000 : return (i + j) % 2 === 0;
+        case QRMaskPattern.PATTERN001 : return i % 2 === 0;
+        case QRMaskPattern.PATTERN010 : return j % 3 === 0;
+        case QRMaskPattern.PATTERN011 : return (i + j) % 3 === 0;
+        case QRMaskPattern.PATTERN100 : return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 === 0;
+        case QRMaskPattern.PATTERN101 : return (i * j) % 2 + (i * j) % 3 === 0;
+        case QRMaskPattern.PATTERN110 : return ( (i * j) % 2 + (i * j) % 3) % 2 === 0;
+        case QRMaskPattern.PATTERN111 : return ( (i * j) % 3 + (i + j) % 2) % 2 === 0;
+
+        default :
+            throw new Error("bad maskPattern:" + maskPattern);
+        }
+    },
+
+    getErrorCorrectPolynomial : function(errorCorrectLength) {
+
+        var a = new QRPolynomial([1], 0);
+
+        for (var i = 0; i < errorCorrectLength; i++) {
+            a = a.multiply(new QRPolynomial([1, QRMath.gexp(i)], 0) );
+        }
+
+        return a;
+    },
+
+    getLengthInBits : function(mode, type) {
+
+        if (1 <= type && type < 10) {
+
+            // 1 - 9
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 10;
+            case QRMode.MODE_ALPHA_NUM  : return 9;
+            case QRMode.MODE_8BIT_BYTE  : return 8;
+            case QRMode.MODE_KANJI      : return 8;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else if (type < 27) {
+
+            // 10 - 26
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 12;
+            case QRMode.MODE_ALPHA_NUM  : return 11;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 10;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else if (type < 41) {
+
+            // 27 - 40
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 14;
+            case QRMode.MODE_ALPHA_NUM  : return 13;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 12;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else {
+            throw new Error("type:" + type);
+        }
+    },
+
+    getLostPoint : function(qrCode) {
+        
+        var moduleCount = qrCode.getModuleCount();
+        var lostPoint = 0;
+        var row = 0; 
+        var col = 0;
+
+        
+        // LEVEL1
+        
+        for (row = 0; row < moduleCount; row++) {
+
+            for (col = 0; col < moduleCount; col++) {
+
+                var sameCount = 0;
+                var dark = qrCode.isDark(row, col);
+
+                for (var r = -1; r <= 1; r++) {
+
+                    if (row + r < 0 || moduleCount <= row + r) {
+                        continue;
+                    }
+
+                    for (var c = -1; c <= 1; c++) {
+
+                        if (col + c < 0 || moduleCount <= col + c) {
+                            continue;
+                        }
+
+                        if (r === 0 && c === 0) {
+                            continue;
+                        }
+
+                        if (dark === qrCode.isDark(row + r, col + c) ) {
+                            sameCount++;
+                        }
+                    }
+                }
+
+                if (sameCount > 5) {
+                    lostPoint += (3 + sameCount - 5);
+                }
+            }
+        }
+
+        // LEVEL2
+
+        for (row = 0; row < moduleCount - 1; row++) {
+            for (col = 0; col < moduleCount - 1; col++) {
+                var count = 0;
+                if (qrCode.isDark(row,     col    ) ) count++;
+                if (qrCode.isDark(row + 1, col    ) ) count++;
+                if (qrCode.isDark(row,     col + 1) ) count++;
+                if (qrCode.isDark(row + 1, col + 1) ) count++;
+                if (count === 0 || count === 4) {
+                    lostPoint += 3;
+                }
+            }
+        }
+
+        // LEVEL3
+
+        for (row = 0; row < moduleCount; row++) {
+            for (col = 0; col < moduleCount - 6; col++) {
+                if (qrCode.isDark(row, col) && 
+                        !qrCode.isDark(row, col + 1) && 
+                         qrCode.isDark(row, col + 2) && 
+                         qrCode.isDark(row, col + 3) && 
+                         qrCode.isDark(row, col + 4) && 
+                        !qrCode.isDark(row, col + 5) && 
+                         qrCode.isDark(row, col + 6) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount - 6; row++) {
+                if (qrCode.isDark(row, col) &&
+                        !qrCode.isDark(row + 1, col) &&
+                         qrCode.isDark(row + 2, col) &&
+                         qrCode.isDark(row + 3, col) &&
+                         qrCode.isDark(row + 4, col) &&
+                        !qrCode.isDark(row + 5, col) &&
+                         qrCode.isDark(row + 6, col) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+
+        // LEVEL4
+        
+        var darkCount = 0;
+
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount; row++) {
+                if (qrCode.isDark(row, col) ) {
+                    darkCount++;
+                }
+            }
+        }
+        
+        var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+        lostPoint += ratio * 10;
+
+        return lostPoint;       
+    }
+
+};
+
+module.exports = QRUtil;
+
+},"./index": function(require,module,exports){
+//---------------------------------------------------------------------
+// QRCode for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//   http://www.opensource.org/licenses/mit-license.php
+//
+// The word "QR Code" is registered trademark of 
+// DENSO WAVE INCORPORATED
+//   http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+// Modified to work in node for this project (and some refactoring)
+//---------------------------------------------------------------------
+
+var QR8bitByte = require('./QR8bitByte');
+var QRUtil = require('./QRUtil');
+var QRPolynomial = require('./QRPolynomial');
+var QRRSBlock = require('./QRRSBlock');
+var QRBitBuffer = require('./QRBitBuffer');
+
+function QRCode(typeNumber, errorCorrectLevel) {
+	this.typeNumber = typeNumber;
+	this.errorCorrectLevel = errorCorrectLevel;
+	this.modules = null;
+	this.moduleCount = 0;
+	this.dataCache = null;
+	this.dataList = [];
+}
+
+QRCode.prototype = {
+	
+	addData : function(data) {
+		var newData = new QR8bitByte(data);
+		this.dataList.push(newData);
+		this.dataCache = null;
+	},
+	
+	isDark : function(row, col) {
+		if (row < 0 || this.moduleCount <= row || col < 0 || this.moduleCount <= col) {
+			throw new Error(row + "," + col);
+		}
+		return this.modules[row][col];
+	},
+
+	getModuleCount : function() {
+		return this.moduleCount;
+	},
+	
+	make : function() {
+		// Calculate automatically typeNumber if provided is < 1
+		if (this.typeNumber < 1 ){
+			var typeNumber = 1;
+			for (typeNumber = 1; typeNumber < 40; typeNumber++) {
+				var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, this.errorCorrectLevel);
+
+				var buffer = new QRBitBuffer();
+				var totalDataCount = 0;
+				for (var i = 0; i < rsBlocks.length; i++) {
+					totalDataCount += rsBlocks[i].dataCount;
+				}
+
+				for (var x = 0; x < this.dataList.length; x++) {
+					var data = this.dataList[x];
+					buffer.put(data.mode, 4);
+					buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+					data.write(buffer);
+				}
+				if (buffer.getLengthInBits() <= totalDataCount * 8)
+					break;
+			}
+			this.typeNumber = typeNumber;
+		}
+		this.makeImpl(false, this.getBestMaskPattern() );
+	},
+	
+	makeImpl : function(test, maskPattern) {
+		
+		this.moduleCount = this.typeNumber * 4 + 17;
+		this.modules = new Array(this.moduleCount);
+		
+		for (var row = 0; row < this.moduleCount; row++) {
+			
+			this.modules[row] = new Array(this.moduleCount);
+			
+			for (var col = 0; col < this.moduleCount; col++) {
+				this.modules[row][col] = null;//(col + row) % 3;
+			}
+		}
+	
+		this.setupPositionProbePattern(0, 0);
+		this.setupPositionProbePattern(this.moduleCount - 7, 0);
+		this.setupPositionProbePattern(0, this.moduleCount - 7);
+		this.setupPositionAdjustPattern();
+		this.setupTimingPattern();
+		this.setupTypeInfo(test, maskPattern);
+		
+		if (this.typeNumber >= 7) {
+			this.setupTypeNumber(test);
+		}
+	
+		if (this.dataCache === null) {
+			this.dataCache = QRCode.createData(this.typeNumber, this.errorCorrectLevel, this.dataList);
+		}
+	
+		this.mapData(this.dataCache, maskPattern);
+	},
+
+	setupPositionProbePattern : function(row, col)  {
+		
+		for (var r = -1; r <= 7; r++) {
+			
+			if (row + r <= -1 || this.moduleCount <= row + r) continue;
+			
+			for (var c = -1; c <= 7; c++) {
+				
+				if (col + c <= -1 || this.moduleCount <= col + c) continue;
+				
+				if ( (0 <= r && r <= 6 && (c === 0 || c === 6) ) || 
+                     (0 <= c && c <= 6 && (r === 0 || r === 6) ) || 
+                     (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+					this.modules[row + r][col + c] = true;
+				} else {
+					this.modules[row + r][col + c] = false;
+				}
+			}		
+		}		
+	},
+	
+	getBestMaskPattern : function() {
+	
+		var minLostPoint = 0;
+		var pattern = 0;
+	
+		for (var i = 0; i < 8; i++) {
+			
+			this.makeImpl(true, i);
+	
+			var lostPoint = QRUtil.getLostPoint(this);
+	
+			if (i === 0 || minLostPoint >  lostPoint) {
+				minLostPoint = lostPoint;
+				pattern = i;
+			}
+		}
+	
+		return pattern;
+	},
+	
+	createMovieClip : function(target_mc, instance_name, depth) {
+	
+		var qr_mc = target_mc.createEmptyMovieClip(instance_name, depth);
+		var cs = 1;
+	
+		this.make();
+
+		for (var row = 0; row < this.modules.length; row++) {
+			
+			var y = row * cs;
+			
+			for (var col = 0; col < this.modules[row].length; col++) {
+	
+				var x = col * cs;
+				var dark = this.modules[row][col];
+			
+				if (dark) {
+					qr_mc.beginFill(0, 100);
+					qr_mc.moveTo(x, y);
+					qr_mc.lineTo(x + cs, y);
+					qr_mc.lineTo(x + cs, y + cs);
+					qr_mc.lineTo(x, y + cs);
+					qr_mc.endFill();
+				}
+			}
+		}
+		
+		return qr_mc;
+	},
+
+	setupTimingPattern : function() {
+		
+		for (var r = 8; r < this.moduleCount - 8; r++) {
+			if (this.modules[r][6] !== null) {
+				continue;
+			}
+			this.modules[r][6] = (r % 2 === 0);
+		}
+	
+		for (var c = 8; c < this.moduleCount - 8; c++) {
+			if (this.modules[6][c] !== null) {
+				continue;
+			}
+			this.modules[6][c] = (c % 2 === 0);
+		}
+	},
+	
+	setupPositionAdjustPattern : function() {
+	
+		var pos = QRUtil.getPatternPosition(this.typeNumber);
+		
+		for (var i = 0; i < pos.length; i++) {
+		
+			for (var j = 0; j < pos.length; j++) {
+			
+				var row = pos[i];
+				var col = pos[j];
+				
+				if (this.modules[row][col] !== null) {
+					continue;
+				}
+				
+				for (var r = -2; r <= 2; r++) {
+				
+					for (var c = -2; c <= 2; c++) {
+					
+						if (Math.abs(r) === 2 || 
+                            Math.abs(c) === 2 ||
+                            (r === 0 && c === 0) ) {
+							this.modules[row + r][col + c] = true;
+						} else {
+							this.modules[row + r][col + c] = false;
+						}
+					}
+				}
+			}
+		}
+	},
+	
+	setupTypeNumber : function(test) {
+	
+		var bits = QRUtil.getBCHTypeNumber(this.typeNumber);
+        var mod;
+	
+		for (var i = 0; i < 18; i++) {
+			mod = (!test && ( (bits >> i) & 1) === 1);
+			this.modules[Math.floor(i / 3)][i % 3 + this.moduleCount - 8 - 3] = mod;
+		}
+	
+		for (var x = 0; x < 18; x++) {
+			mod = (!test && ( (bits >> x) & 1) === 1);
+			this.modules[x % 3 + this.moduleCount - 8 - 3][Math.floor(x / 3)] = mod;
+		}
+	},
+	
+	setupTypeInfo : function(test, maskPattern) {
+	
+		var data = (this.errorCorrectLevel << 3) | maskPattern;
+		var bits = QRUtil.getBCHTypeInfo(data);
+        var mod;
+	
+		// vertical		
+		for (var v = 0; v < 15; v++) {
+	
+			mod = (!test && ( (bits >> v) & 1) === 1);
+	
+			if (v < 6) {
+				this.modules[v][8] = mod;
+			} else if (v < 8) {
+				this.modules[v + 1][8] = mod;
+			} else {
+				this.modules[this.moduleCount - 15 + v][8] = mod;
+			}
+		}
+	
+		// horizontal
+		for (var h = 0; h < 15; h++) {
+	
+			mod = (!test && ( (bits >> h) & 1) === 1);
+			
+			if (h < 8) {
+				this.modules[8][this.moduleCount - h - 1] = mod;
+			} else if (h < 9) {
+				this.modules[8][15 - h - 1 + 1] = mod;
+			} else {
+				this.modules[8][15 - h - 1] = mod;
+			}
+		}
+	
+		// fixed module
+		this.modules[this.moduleCount - 8][8] = (!test);
+	
+	},
+	
+	mapData : function(data, maskPattern) {
+		
+		var inc = -1;
+		var row = this.moduleCount - 1;
+		var bitIndex = 7;
+		var byteIndex = 0;
+		
+		for (var col = this.moduleCount - 1; col > 0; col -= 2) {
+	
+			if (col === 6) col--;
+	
+			while (true) {
+	
+				for (var c = 0; c < 2; c++) {
+					
+					if (this.modules[row][col - c] === null) {
+						
+						var dark = false;
+	
+						if (byteIndex < data.length) {
+							dark = ( ( (data[byteIndex] >>> bitIndex) & 1) === 1);
+						}
+	
+						var mask = QRUtil.getMask(maskPattern, row, col - c);
+	
+						if (mask) {
+							dark = !dark;
+						}
+						
+						this.modules[row][col - c] = dark;
+						bitIndex--;
+	
+						if (bitIndex === -1) {
+							byteIndex++;
+							bitIndex = 7;
+						}
+					}
+				}
+								
+				row += inc;
+	
+				if (row < 0 || this.moduleCount <= row) {
+					row -= inc;
+					inc = -inc;
+					break;
+				}
+			}
+		}
+		
+	}
+
+};
+
+QRCode.PAD0 = 0xEC;
+QRCode.PAD1 = 0x11;
+
+QRCode.createData = function(typeNumber, errorCorrectLevel, dataList) {
+	
+	var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel);
+	
+	var buffer = new QRBitBuffer();
+	
+	for (var i = 0; i < dataList.length; i++) {
+		var data = dataList[i];
+		buffer.put(data.mode, 4);
+		buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+		data.write(buffer);
+	}
+
+	// calc num max data.
+	var totalDataCount = 0;
+	for (var x = 0; x < rsBlocks.length; x++) {
+		totalDataCount += rsBlocks[x].dataCount;
+	}
+
+	if (buffer.getLengthInBits() > totalDataCount * 8) {
+		throw new Error("code length overflow. (" + 
+            buffer.getLengthInBits() + 
+            ">" +  
+            totalDataCount * 8 + 
+            ")");
+	}
+
+	// end code
+	if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+		buffer.put(0, 4);
+	}
+
+	// padding
+	while (buffer.getLengthInBits() % 8 !== 0) {
+		buffer.putBit(false);
+	}
+
+	// padding
+	while (true) {
+		
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD0, 8);
+		
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD1, 8);
+	}
+
+	return QRCode.createBytes(buffer, rsBlocks);
+};
+
+QRCode.createBytes = function(buffer, rsBlocks) {
+
+	var offset = 0;
+	
+	var maxDcCount = 0;
+	var maxEcCount = 0;
+	
+	var dcdata = new Array(rsBlocks.length);
+	var ecdata = new Array(rsBlocks.length);
+	
+	for (var r = 0; r < rsBlocks.length; r++) {
+
+		var dcCount = rsBlocks[r].dataCount;
+		var ecCount = rsBlocks[r].totalCount - dcCount;
+
+		maxDcCount = Math.max(maxDcCount, dcCount);
+		maxEcCount = Math.max(maxEcCount, ecCount);
+		
+		dcdata[r] = new Array(dcCount);
+		
+		for (var i = 0; i < dcdata[r].length; i++) {
+			dcdata[r][i] = 0xff & buffer.buffer[i + offset];
+		}
+		offset += dcCount;
+		
+		var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+		var rawPoly = new QRPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+		var modPoly = rawPoly.mod(rsPoly);
+		ecdata[r] = new Array(rsPoly.getLength() - 1);
+		for (var x = 0; x < ecdata[r].length; x++) {
+            var modIndex = x + modPoly.getLength() - ecdata[r].length;
+			ecdata[r][x] = (modIndex >= 0)? modPoly.get(modIndex) : 0;
+		}
+
+	}
+	
+	var totalCodeCount = 0;
+	for (var y = 0; y < rsBlocks.length; y++) {
+		totalCodeCount += rsBlocks[y].totalCount;
+	}
+
+	var data = new Array(totalCodeCount);
+	var index = 0;
+
+	for (var z = 0; z < maxDcCount; z++) {
+		for (var s = 0; s < rsBlocks.length; s++) {
+			if (z < dcdata[s].length) {
+				data[index++] = dcdata[s][z];
+			}
+		}
+	}
+
+	for (var xx = 0; xx < maxEcCount; xx++) {
+		for (var t = 0; t < rsBlocks.length; t++) {
+			if (xx < ecdata[t].length) {
+				data[index++] = ecdata[t][xx];
+			}
+		}
+	}
+
+	return data;
+
+};
+
+module.exports = QRCode;
+
+}};
+  const cache = {};
+  function req(id){
+    if(cache[id]) return cache[id].exports;
+    if(!modules[id]) throw new Error("QR module not found: "+id);
+    const m={exports:{}}; cache[id]=m;
+    modules[id](req,m,m.exports);
+    return m.exports;
+  }
+  g.FDQRCodeModel = req("./index");
+  g.FDQRErrorCorrectLevel = req("./QRErrorCorrectLevel");
+})(window);
+
+</script>
+
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id);
+const senderRole=$('senderRole'),receiverRole=$('receiverRole'),senderPanel=$('senderPanel'),receiverPanel=$('receiverPanel');
+const sendPane=$('sendPane'),recvPane=$('recvPane'),dot=$('dot'),statusEl=$('status'),iceEl=$('ice');
+const startSender=$('startSender'),senderOfferBox=$('senderOfferBox'),senderPin=$('senderPin'),offerQR=$('offerQR'),scanAnswerBox=$('scanAnswerBox');
+const scanAnswer=$('scanAnswer'),answerImage=$('answerImage'),answerImageBtn=$('answerImageBtn'),offerPacket=$('offerPacket'),copyOfferPacket=$('copyOfferPacket'),answerPacketIn=$('answerPacketIn'),applyAnswerPacket=$('applyAnswerPacket');
+const scanOffer=$('scanOffer'),offerImage=$('offerImage'),offerImageBtn=$('offerImageBtn'),receiverAnswerBox=$('receiverAnswerBox'),receiverPin=$('receiverPin'),answerQR=$('answerQR'),offerPacketIn=$('offerPacketIn'),applyOfferPacket=$('applyOfferPacket'),answerPacket=$('answerPacket'),copyAnswerPacket=$('copyAnswerPacket');
+const filePicker=$('filePicker'),drop=$('drop'),fileList=$('fileList'),sendBtn=$('sendBtn'),clearBtn=$('clearBtn'),cancelBtn=$('cancelBtn'),received=$('received');
+const bar=$('bar'),pct=$('pct'),speed=$('speed'),doneEl=$('done'),totalEl=$('total'),active=$('active');
+const cameraOverlay=$('cameraOverlay'),video=$('video'),closeCam=$('closeCam'),toastEl=$('toast');
+
+let role=null,pc=null,dc=null,connected=false,files=[],cancelRequested=false;
+let txTotal=0,txDone=0,txStart=0,txLastBytes=0,txLastTime=0,rxTotal=0,rxDone=0,rxStart=0,rxLastBytes=0,rxLastTime=0,currentRx=null;
+let camStream=null,camRAF=0,camDetector=null,camCallback=null;
+const CHUNK=64*1024,HIGH=8*1024*1024,LOW=2*1024*1024;
+
+function toast(s){toastEl.textContent=s;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),1600)}
+function fmt(b){if(!b||b<0)return'0 B';const u=['B','KB','MB','GB','TB'];const i=Math.min(Math.floor(Math.log(Math.max(b,1))/Math.log(1024)),u.length-1);return(b/1024**i).toFixed(i?2:0)+' '+u[i]}
+function setStatus(s,m=''){statusEl.textContent=s;dot.className='dot'+(m?' '+m:'')}
+function resetProg(t=0){bar.style.width='0%';pct.textContent='0%';speed.textContent='0 MB/s';doneEl.textContent='0 B';totalEl.textContent=fmt(t);active.textContent='لا يوجد نقل حالي.'}
+function prog(d,t,start,rx=false){const p=t?Math.min(100,d/t*100):0;bar.style.width=p.toFixed(1)+'%';pct.textContent=p.toFixed(1)+'%';doneEl.textContent=fmt(d);totalEl.textContent=fmt(t);const now=performance.now();let lb=rx?rxLastBytes:txLastBytes,lt=rx?rxLastTime:txLastTime;if(now-lt>=500){const bps=(d-lb)/((now-lt)/1000);speed.textContent=(bps/1048576).toFixed(2)+' MB/s';if(rx){rxLastBytes=d;rxLastTime=now}else{txLastBytes=d;txLastTime=now}}}
+function cleanup(){try{dc&&dc.close()}catch{}try{pc&&pc.close()}catch{}pc=dc=null;connected=false;sendBtn.disabled=true;setStatus('غير متصل')}
+function choose(r){cleanup();role=r;senderRole.classList.toggle('active',r==='sender');receiverRole.classList.toggle('active',r==='receiver');senderPanel.classList.toggle('hide',r!=='sender');receiverPanel.classList.toggle('hide',r!=='receiver');sendPane.classList.toggle('hide',r!=='sender');recvPane.classList.toggle('hide',r!=='receiver');iceEl.textContent=r==='sender'?'Sender':'Receiver';resetProg(r==='sender'?files.reduce((a,f)=>a+f.size,0):0)}
+senderRole.onclick=()=>choose('sender');receiverRole.onclick=()=>choose('receiver');
+
+function newPeer(){
+  cleanup();
+  pc=new RTCPeerConnection({iceServers:[],bundlePolicy:'max-bundle'});
+  pc.onconnectionstatechange=()=>{
+    const s=pc.connectionState;
+    if(s==='connected'){connected=true;setStatus('متصل مباشرة','ok');sendBtn.disabled=role!=='sender'||!files.length;toast('تم الاتصال')}
+    else if(s==='connecting')setStatus('جارِ الاتصال...','warn');
+    else if(s==='failed'){connected=false;setStatus('فشل الاتصال','bad')}
+    else if(s==='disconnected'){connected=false;setStatus('انقطع الاتصال','bad')}
+  };
+  pc.oniceconnectionstatechange=()=>iceEl.textContent='ICE: '+pc.iceConnectionState;
+  if(role==='receiver')pc.ondatachannel=e=>setupDC(e.channel);
+  return pc;
+}
+function setupDC(ch){
+  dc=ch;dc.binaryType='arraybuffer';dc.bufferedAmountLowThreshold=LOW;
+  dc.onopen=()=>{connected=true;setStatus('متصل مباشرة','ok');if(role==='sender')sendBtn.disabled=!files.length};
+  dc.onclose=()=>{connected=false;setStatus('انقطع الاتصال','bad');sendBtn.disabled=true};
+  dc.onerror=()=>setStatus('خطأ في الاتصال','bad');
+  if(role==='receiver')dc.onmessage=handleIncoming;
+}
+function waitIce(peer,ms=12000){return new Promise(res=>{if(peer.iceGatheringState==='complete')return res();let done=false;const f=()=>{if(done)return;done=true;peer.removeEventListener('icegatheringstatechange',c);res()};const c=()=>peer.iceGatheringState==='complete'&&f();peer.addEventListener('icegatheringstatechange',c);setTimeout(f,ms)})}
+
+function b64u(bytes){let s='';for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function unb64u(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+async function compress(bytes){
+  if(!('CompressionStream'in window))return {c:0,b:bytes};
+  const cs=new CompressionStream('deflate-raw');const w=cs.writable.getWriter();w.write(bytes);w.close();
+  return {c:1,b:new Uint8Array(await new Response(cs.readable).arrayBuffer())};
+}
+async function decompress(bytes,c){
+  if(!c)return bytes;
+  const ds=new DecompressionStream('deflate-raw');const w=ds.writable.getWriter();w.write(bytes);w.close();
+  return new Uint8Array(await new Response(ds.readable).arrayBuffer());
+}
+async function encodeDesc(desc){
+  const raw=new TextEncoder().encode(JSON.stringify({t:desc.type,s:desc.sdp}));
+  const z=await compress(raw);return 'FDP1.'+z.c+'.'+b64u(z.b);
+}
+async function decodeDesc(packet){
+  packet=(packet||'').trim();if(!packet.startsWith('FDP1.'))throw new Error('رمز FlashDrop غير صالح');
+  const p=packet.split('.');const raw=await decompress(unb64u(p.slice(2).join('.')),Number(p[1]));
+  const o=JSON.parse(new TextDecoder().decode(raw));if(!o.t||!o.s)throw new Error('بيانات ناقصة');return{type:o.t,sdp:o.s};
+}
+function simpleHash(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function pinFor(s){return String(simpleHash(s)%10000).padStart(4,'0')}
+
+function drawQR(el,text){
+  el.innerHTML='';
+  try{
+    const qr=new FDQRCodeModel(0,FDQRErrorCorrectLevel.L);qr.addData(text);qr.make();
+    const n=qr.getModuleCount(),pad=4,canvas=document.createElement('canvas'),size=n+pad*2;
+    canvas.width=canvas.height=size;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);ctx.fillStyle='#000';
+    for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(qr.isDark(r,c))ctx.fillRect(c+pad,r+pad,1,1);
+    el.appendChild(canvas);
+  }catch(e){console.error(e);el.innerHTML='<div style="color:#111;padding:14px;text-align:center">تعذر توليد QR. استخدم خيارات التوافق.</div>'}
+}
+
+async function copyText(s){try{await navigator.clipboard.writeText(s);toast('تم النسخ')}catch{const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();toast('تم النسخ')}}
+copyOfferPacket.onclick=()=>copyText(offerPacket.value);copyAnswerPacket.onclick=()=>copyText(answerPacket.value);
+
+startSender.onclick=async()=>{
+  try{
+    choose('sender');const peer=newPeer();setupDC(peer.createDataChannel('flashdrop',{ordered:true}));
+    setStatus('إنشاء رمز الربط...','warn');const off=await peer.createOffer();await peer.setLocalDescription(off);await waitIce(peer);
+    const packet=await encodeDesc(peer.localDescription);offerPacket.value=packet;senderPin.textContent=pinFor(packet);drawQR(offerQR,packet);
+    senderOfferBox.classList.remove('hide');scanAnswerBox.classList.remove('hide');setStatus('امسح QR من الجهاز الثاني','warn');
+  }catch(e){console.error(e);setStatus('تعذر إنشاء الربط','bad');alert(e.message)}
+};
+
+async function makeReceiverAnswer(packet){
+  choose('receiver');const remote=await decodeDesc(packet);const peer=newPeer();await peer.setRemoteDescription(remote);
+  const ans=await peer.createAnswer();await peer.setLocalDescription(ans);await waitIce(peer);
+  const aPacket=await encodeDesc(peer.localDescription);answerPacket.value=aPacket;receiverPin.textContent=pinFor(packet);drawQR(answerQR,aPacket);receiverAnswerBox.classList.remove('hide');setStatus('خلِّ المرسل يمسح QR الرد','warn');
+}
+applyOfferPacket.onclick=async()=>{try{await makeReceiverAnswer(offerPacketIn.value)}catch(e){alert(e.message)}};
+
+async function applyAnswer(packet){
+  if(!pc)throw new Error('أنشئ رمز المرسل أولاً');const remote=await decodeDesc(packet);setStatus('إكمال الاتصال...','warn');await pc.setRemoteDescription(remote)
+}
+applyAnswerPacket.onclick=async()=>{try{await applyAnswer(answerPacketIn.value)}catch(e){alert(e.message)}};
+
+async function detectFromFile(file,cb){
+  if(!('BarcodeDetector'in window))throw new Error('المتصفح لا يدعم قراءة QR داخلياً. استخدم Chrome حديث أو خيارات التوافق.');
+  const det=new BarcodeDetector({formats:['qr_code']});const bmp=await createImageBitmap(file);const codes=await det.detect(bmp);bmp.close&&bmp.close();
+  if(!codes.length)throw new Error('لم يتم العثور على QR في الصورة');await cb(codes[0].rawValue)
+}
+offerImageBtn.onclick=()=>offerImage.click();answerImageBtn.onclick=()=>answerImage.click();
+offerImage.onchange=async()=>{try{if(offerImage.files[0])await detectFromFile(offerImage.files[0],makeReceiverAnswer)}catch(e){alert(e.message)}finally{offerImage.value=''}};
+answerImage.onchange=async()=>{try{if(answerImage.files[0])await detectFromFile(answerImage.files[0],applyAnswer)}catch(e){alert(e.message)}finally{answerImage.value=''}};
+
+async function openScanner(cb){
+  if(!('BarcodeDetector'in window))throw new Error('BarcodeDetector غير مدعوم بهذا المتصفح. استخدم Chrome حديث أو خيار صورة/التوافق.');
+  camCallback=cb;camDetector=new BarcodeDetector({formats:['qr_code']});
+  camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+  video.srcObject=camStream;cameraOverlay.classList.remove('hide');await video.play();
+  const tick=async()=>{
+    if(!camStream)return;
+    try{
+      const codes=await camDetector.detect(video);
+      if(codes.length){const val=codes[0].rawValue;stopScanner();await camCallback(val);return}
+    }catch{}
+    camRAF=requestAnimationFrame(tick);
+  };tick();
+}
+function stopScanner(){cancelAnimationFrame(camRAF);camRAF=0;if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}video.srcObject=null;cameraOverlay.classList.add('hide')}
+closeCam.onclick=stopScanner;
+scanOffer.onclick=async()=>{try{await openScanner(makeReceiverAnswer)}catch(e){alert('تعذر فتح الماسح:\\n'+e.message)}};
+scanAnswer.onclick=async()=>{try{await openScanner(applyAnswer)}catch(e){alert('تعذر فتح الماسح:\\n'+e.message)}};
+
+function setFiles(list){files=Array.from(list||[]);renderFiles();const t=files.reduce((a,f)=>a+f.size,0);resetProg(t);clearBtn.disabled=!files.length;sendBtn.disabled=!connected||!files.length}
+function renderFiles(){fileList.innerHTML='';files.forEach((f,i)=>{const d=document.createElement('div');d.className='file';const m=document.createElement('div');m.className='meta';const b=document.createElement('b');b.textContent=f.name;const s=document.createElement('small');s.textContent=fmt(f.size)+(f.type?' • '+f.type:'');m.append(b,s);const x=document.createElement('button');x.textContent='حذف';x.onclick=()=>{files.splice(i,1);setFiles(files)};d.append(m,x);fileList.appendChild(d)})}
+filePicker.onchange=()=>setFiles(filePicker.files);clearBtn.onclick=()=>{filePicker.value='';setFiles([])};
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')}));
+drop.addEventListener('drop',e=>{if(e.dataTransfer.files?.length)setFiles(e.dataTransfer.files)});
+
+function waitDrain(){if(!dc||dc.readyState!=='open')return Promise.reject(new Error('الاتصال غير مفتوح'));if(dc.bufferedAmount<=HIGH)return Promise.resolve();return new Promise((res,rej)=>{const low=()=>{cl();res()},close=()=>{cl();rej(new Error('انقطع الاتصال'))},cl=()=>{dc.removeEventListener('bufferedamountlow',low);dc.removeEventListener('close',close)};dc.addEventListener('bufferedamountlow',low,{once:true});dc.addEventListener('close',close,{once:true})})}
+function sendJSON(o){dc.send(JSON.stringify(o))}
+sendBtn.onclick=async()=>{
+  if(!dc||dc.readyState!=='open'||!files.length)return;
+  cancelRequested=false;sendBtn.disabled=true;clearBtn.disabled=true;cancelBtn.disabled=false;txTotal=files.reduce((a,f)=>a+f.size,0);txDone=0;resetProg(txTotal);txStart=txLastTime=performance.now();txLastBytes=0;
+  try{
+    sendJSON({t:'batch',count:files.length,total:txTotal});
+    for(let i=0;i<files.length&&!cancelRequested;i++){
+      const f=files[i];active.textContent=`إرسال ${i+1}/${files.length}: ${f.name}`;sendJSON({t:'file-start',i,name:f.name,size:f.size,type:f.type||'application/octet-stream'});
+      let off=0;while(off<f.size&&!cancelRequested){await waitDrain();const end=Math.min(off+CHUNK,f.size),buf=await f.slice(off,end).arrayBuffer();dc.send(buf);txDone+=end-off;off=end;prog(txDone,txTotal,txStart,false);if((off/CHUNK)%24===0)await new Promise(r=>setTimeout(r,0))}
+      if(!cancelRequested)sendJSON({t:'file-end',i,size:f.size});
+    }
+    if(cancelRequested){sendJSON({t:'cancel'});active.textContent='تم إيقاف النقل.'}else{sendJSON({t:'batch-end'});prog(txTotal,txTotal,txStart,false);active.textContent='اكتمل الإرسال.';toast('اكتمل الإرسال')}
+  }catch(e){console.error(e);alert('خطأ أثناء الإرسال:\\n'+e.message)}
+  finally{cancelBtn.disabled=true;clearBtn.disabled=!files.length;sendBtn.disabled=!connected||!files.length}
+};
+cancelBtn.onclick=()=>{cancelRequested=true;cancelBtn.disabled=true};
+
+function handleIncoming(ev){
+  if(typeof ev.data==='string'){
+    let m;try{m=JSON.parse(ev.data)}catch{return}
+    if(m.t==='batch'){rxTotal=Number(m.total)||0;rxDone=0;resetProg(rxTotal);rxStart=rxLastTime=performance.now();rxLastBytes=0;active.textContent='بدء الاستلام...'}
+    else if(m.t==='file-start'){currentRx={name:m.name||'file.bin',size:Number(m.size)||0,type:m.type||'application/octet-stream',chunks:[],received:0};active.textContent='استلام: '+currentRx.name}
+    else if(m.t==='file-end'){if(!currentRx)return;const it=currentRx;currentRx=null;if(it.received!==it.size){addRecv(it,null,'حجم غير مطابق');return}const blob=new Blob(it.chunks,{type:it.type});it.chunks=null;addRecv(it,blob)}
+    else if(m.t==='batch-end'){prog(rxTotal,rxTotal,rxStart,true);active.textContent='اكتمل الاستلام.';toast('اكتمل الاستلام')}
+    else if(m.t==='cancel'){currentRx=null;active.textContent='أوقف المرسل النقل.'}
+    return;
+  }
+  if(ev.data instanceof ArrayBuffer&&currentRx){currentRx.chunks.push(ev.data);currentRx.received+=ev.data.byteLength;rxDone+=ev.data.byteLength;prog(rxDone,rxTotal,rxStart,true)}
+}
+function addRecv(it,blob,err=''){const d=document.createElement('div');d.className='recv';const m=document.createElement('div');m.className='meta';const b=document.createElement('b');b.textContent=it.name;const s=document.createElement('small');s.textContent=err?'⚠ '+err:fmt(blob.size)+' • مكتمل';m.append(b,s);d.append(m);if(blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=it.name;a.textContent='حفظ';d.append(a)}received.prepend(d)}
+
+if(!('RTCPeerConnection'in window)){setStatus('WebRTC غير مدعوم','bad');senderRole.disabled=receiverRole.disabled=true}
+})();
+</script>
+</body>
+</html>
